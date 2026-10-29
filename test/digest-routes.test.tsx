@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import type { DigestNight } from '../src/digest/types.js';
 
@@ -28,14 +28,11 @@ const config = (runsDir: string) => ({
   runsDir,
 });
 
-let tmp: string;
-
-beforeAll(() => {
-  tmp = mkdtempSync(join(tmpdir(), 'rig-routes-'));
-  writeFileSync(join(tmp, `${NORMAL}.jsonl`), bundled(NORMAL));
-  writeFileSync(join(tmp, `${EMPTY}.jsonl`), '');
-  writeFileSync(join(tmp, `${BAD}.jsonl`), `${BAD_NIGHT}\n`);
-});
+// Built at load time, not in beforeAll: each describe creates its app while being collected.
+const tmp = mkdtempSync(join(tmpdir(), 'rig-routes-'));
+writeFileSync(join(tmp, `${NORMAL}.jsonl`), bundled(NORMAL));
+writeFileSync(join(tmp, `${EMPTY}.jsonl`), '');
+writeFileSync(join(tmp, `${BAD}.jsonl`), `${BAD_NIGHT}\n`);
 
 afterAll(() => rmSync(tmp, { recursive: true, force: true }));
 
